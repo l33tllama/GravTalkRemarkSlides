@@ -133,7 +133,7 @@ title: Contact
 
 # Add a page with subdirectories (portfolio)
 
-*Twig file: /themes/leos-theme/templates/portfolio.twig*
+*Twig file: /themes/leos-theme/templates/portfolio.html.twig*
 ```Twig
 {% extends 'partials/base.html.twig' %}
 
@@ -197,7 +197,32 @@ It has a camera and speaker.
 You use a web interface to see through the camera and control the movement with clickable buttons.
 ```
 
-### See portfolio_item.twig file
+---
+# Add a page with taxonomy
+### This defines a simple portfolio item page
+
+*/themes/leos-theme/templates/portfolio_item.html.twig*
+```twig
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+    <a href="../current-projects">
+      <h3>
+        <span class="fa fa-chevron-left">
+        </span> Current Projects
+      </h3>
+    </a>
+    {{ page.content }}
+{% endblock %}
+```
+---
+
+# Telepresence Robot
+![](robot_with_cam_mount-small.jpg)
+[plugin:youtube](https://www.youtube.com/watch?v=D6k-XM3IQfs)  
+I have made a robot designed to be used as a telepresence robot. It has a camera and speaker. You use a web interface to see through the camera and control the movement with clickable buttons.
+It uses web sockets to communicate between the remote viewer and the robot itself.
+
 ---
 # Preview tags
 ### You will see tags on the portfolio page
@@ -235,6 +260,221 @@ content:
 * _skills/services.md
 
 Each file has a corresponding twig layout file
+
+---
+
+# Modular Pages - Intro
+*themes/leos-theme/templates/modular/intro.html.twig*
+```Twig
+<section class="intro text-center" id="introduction">
+  <div class="container">
+      <div class="row">
+          {{page.content}}
+      </div>
+  </div>
+</section>
+```
+
+---
+# Modular Pages - Intro
+*pages/01.home/_intro/intro.md*
+```Markdown
+---
+title: Introduction
+---
+# Hi!
+
+> I am a developer and maker from Hobart Tasmania. I am familiar with Web, Python, Linux, embedded electronics and games.  
+> ###Contact:  
+...etc...
+```
+# Hi!
+
+> I am a developer and maker from Hobart Tasmania. I am familiar with Web, Python, Linux, embedded electronics and games.  
+> ###Contact:  
+...etc...
+
+---
+
+# Modular Pages - Featured Projects
+
+*/themes/leos-theme/templates/modular/portfolio_showcase.html.twig*  
+(Similar to sub directory page)
+* Filters pages by tag, featured
+
+```twig
+{% set collection = taxonomy.findTaxonomy({'tag':'featured'}) %}
+
+{% set taxlist = taxonomylist.get() %} 
+
+<section class="portfolio-items text-center">
+	<div class="container">
+		<div class="row">
+			<div class="">
+			{{page.content}}
+				<div class="portfolio-wrapper">
+				{% for child in collection %}
+					<a class="portfolio-entry col-md-3 wp2 portfolio-{{ loop.index }} {% if vcenter %}vcenter{% endif %}" href="{{child.url}}" {% if ext_links %}target='_blank'{% endif %} style="background-color:{{ child.header.banner_color }}">
+						<div class="portfolio-info">
+							<h2 class="portfolio-title">{{child.title}}</h2>
+							<p class="portflio-tags">{{ child.taxonomy.category|join(', ') }}</p>
+							<p class="portfolio-item">{{child.content_brief}}</p>
+              ...etc...
+            
+```
+---
+
+# Modular Pages - Featured Projects
+
+*/pages/01.home/_portfolio_showcase/portfolio_showcase.md*
+```Markdown
+---
+title: Portfolio Showcase
+---
+# Portfolio Showcase
+
+```
+
+Nothing special needed here
+
+---
+# Blog
+
+### There's a template for that!
+*/themes/leos-theme/templates/blog.html.twig*
+```Twig
+{% embed 'partials/base.html.twig' %}
+
+	{% set collection = page.collection() %}
+
+	{% block content %}
+		{% set blog_image = page.media.images|first.grayscale().contrast(20).brightness(-30).colorize(47,9,35) %}
+
+		{% if blog_image %}
+		<div class="flush-top blog-header blog-header-image" style="background-image: url({{ blog_image.url }});">
+		{% else %}
+		<div class="blog-header">
+		{% endif %}
+			{{ page.content }}
+    </div>
+    {% if config.plugins.breadcrumbs.enabled %}
+    ...etc...
+```
+---
+# Blog
+*/pages/04.blog/blog.md*
+```Markdown
+---
+title: Blog
+#header_image: home-bg.jpg
+content:
+    items: @self.children
+    order:
+        by: date
+        dir: desc
+    limit: 4
+    pagination: true
+
+pagination: true
+---
+# Leo's Blog
+
+This is my blog. You will find my various geeky posts here.
+```
+---
+
+# Blog item
+*/themes/leos-theme/templates/item.html.twig*
+```Twig
+{% embed 'partials/base.html.twig' %}
+	{% block content %}
+		<a href="../blog"><i class="fa fa-chevron-left"></i> Blog</a>
+		{% if config.plugins.breadcrumbs.enabled %}
+			{% include 'partials/breadcrumbs.html.twig' %}
+		{% endif %}
+		<div class="blog-content-item grid pure-g-r">
+			<div id="item" class="block pure-u-1 h-entry">
+			    {% include 'partials/blog_item.html.twig' with {'blog':page.parent, 'truncate':false} %}
+			</div>
+		</div>
+	{% endblock %}
+{% endembed %}
+```
+---
+# Blog item content!
+### Making a blog post!
+
+```Markdown
+---
+title: Welcome
+taxonomy:
+	tag: intro
+---
+
+# Welcome to my blog!
+
+Hello and welcome to my blog and website!
+
+I've finally moved over to a CMS (Content management system) where I can more easily add content about the cool stuff that I do, like electronics, robotics, games, web, etc.
+
+In this site, you'll find;
+```
+---
+# Welcome to my blog!
+
+Hello and welcome to my blog and website!
+
+I've finally moved over to a CMS (Content management system) where I can more easily add content about the cool stuff that I do, like electronics, robotics, games, web, etc.
+
+In this site, you'll find;
+
+Obviously the **home page** - about me and my services
+
+**Portfolio** - my past projects
+
+**Current Projects** - Projects that I'm currently working on, all the media congregated into one place
+
+**Blog** - this section - where I post updates on my projects and other stuff
+
+**Resume** - Also a Markdown file so I can export it for job applications
+
+**Social Media** - some of the social media sites that I have a profile for
+
+---
+
+# Grav admin interface
+
+### Features
+* Content creation
+* Upload files
+* Install plugins
+* Install themes
+* Update plugins
+* Update Grav itself
+* Backups
+* Buggy..
+---
+# Grav CLI
+
+* Update grav
+* Install plugins
+* Backups
+* Update plugins
+```bash
+bin/grav backup
+bin/gpm install <plugin name>
+bin/gpm update
+```
+---
+
+# Example: Install plugin
+```bash 
+bin/gpm install shortcode-core
+bin/gpm install youtube
+```
+
+---
+
 
 
     </textarea>
