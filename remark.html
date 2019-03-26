@@ -25,13 +25,21 @@ class: center, middle
 ## Leo Febey
 
 ---
+# What is Grav?
+![](gravity-film-small3.png)
+*Apparently not inspired by the movie*
+---
 
 # What is Grav?
 
 * Flat-file CMS (No database)
 * Good for personal websites  
 * Blogs, portfolio, etc  
-* Markdown, Twig  
+* Markdown, Twig   
+
+Example: [www.leofebey.com](http://www.leofebey.com)
+
+![](grav-logo.jpg)
 
 ---
 
@@ -45,22 +53,182 @@ class: center, middle
 * Don't need to worry about a database
 
 ---
+# Features
+
+* Twig Templating - UI generation
+* Markdown - content creation
+* YAML - configuration
+* Parsedown - fast PHP Markdown plugin
+* Doctrine Cache - memory cache
+* Pimple Dependency Injection Container
+* Symfony Event Dispatcher
+* Symfony Console
+* Gregwar Image Library
+
+---
+# Doctrine Cache
+## Selects one of the available caches
+* File
+* APC
+* XCache
+* Memcache
+* Redis
+* WinCache
+---
 
 # Install
-* Download and extract zip file
+* Download and extract zip file OR clone from git repo
 * Install php modules
+```bash
+sudo apt install php-curl php-ctype php-dom php-gd php-json php-mbstring
+ php-simplexml php-xml php-zip
+```
 * Enable rewrite
+```bash
+sudo a2enmode rewrite
+```
 * AllowOverride
+##### In /etc/apache/sites-available/000-default.conf
+```XML
+  <Directory /var/www/html>
+    AllowOverride All
+  </Directory>
+```
+---
+# Copy Example Theme
+* Grav uses themes to define style and layout of the pages
+* Twig files define page layouts
+* Example: /themes/leos-theme/templates/default.twig
 
+```Twig
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+    {{ page.content }}
+{% endblock %}
+```
+* Use a default.md file to inherit layout
 ---
 
 # Add a basic page (contact)
 
+*pages/03-contact/default.md:*
+##### Markdown:
+```Markdown
+---
+title: Contact
+---
+# Contact
+* Email - [leofebey@gmail.com](mailto:leofebey@gmail.com)
+* GitHub - [http://www.github.com/l33tllama](http://www.github.com/l33tllama)
+
+```
+##### Rendered:
+
+# Contact
+* Email - [leofebey@gmail.com](mailto:leofebey@gmail.com)
+* GitHub - [http://www.github.com/l33tllama](http://www.github.com/l33tllama)
+
 ---
 
-# Add a page with sub directories (portfolio)
+# Add a page with subdirectories (portfolio)
+
+*Twig file: /themes/leos-theme/templates/portfolio.twig*
+```Twig
+{% extends 'partials/base.html.twig' %}
+
+{% set collection = page.children() %}
+
+{% block content %}
+<div id="content">
+	{{ page.content }}
+
+	<div class="grid">
+		{% set ext_links = page.header.child_type == "external" %}
+		{% set vcenter = count(collection) <= 3 %}
+
+		{% for child in collection %}
+			<a class="entry {% if vcenter %}vcenter{% endif %}" href="{{child.url}}" {% if ext_links %}target='_blank'{% endif %} style="background-color:{{ child.header.banner_color }}">
+				<div class="info">
+					<h2 class="title">{{child.title}}</h2>
+					<p class="tags">{{ child.taxonomy.tag|join(', ') }}</p>
+				</div>
+				
+				{% set blog_image = child.media.images|first %}
+				<img class="portfolio-image" src="{{ blog_image.url }}"/>
+        ...etc...
+      
+```
+---
+# Add a page with subdirectories (portfolio)
+
+*Markdown file: /pages/02.portfolio/portfolio.md*
+
+```Markdown
+---
+title: Portfolio
+content:
+    items: @self.children
+    order:
+        by: default
+        dir: asc
+        custom:
+            - electronics_leos-robot
+            - game_wizards_with_rockets
+            - web_crashupv2
+---
+# Leo's Portflio
+```
+---
+# Add a page with taxonomy
+*/pages/02.portfolio/electronics_leos-robot/portfolio_item.md*
+```Markdown
+---
+title: 'Telepresence Robot'
+taxonomy:
+    tag: [featured, electronics]
+---
+
+# Telepresence Robot
+![](robot_with_cam_mount-small.jpg)
+[plugin:youtube](https://www.youtube.com/watch?v=D6k-XM3IQfs)
+I have made a robot designed to be used as a telepresence robot. 
+It has a camera and speaker.
+You use a web interface to see through the camera and control the movement with clickable buttons.
+```
+
+### See portfolio_item.twig file
+---
+# Preview tags
+### You will see tags on the portfolio page
+---
+
+# Modular Pages
+
+* Good for complex site layouts with multiple 'modules'
+* Combine multiple twig templates into one page
+* Example: Landing page
+
+```Markdown
+---
 
 ---
+title: Leo Febey
+menu: Home
+onpage_menu: true
+content:
+    items: @self.modular
+    order:
+        by: default
+        dir: asc
+        custom:
+            - _intro
+            - _services
+            - _skills
+            - _portfolio_showcase
+---
+```
+
 
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
